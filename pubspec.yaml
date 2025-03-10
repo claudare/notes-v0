@@ -9,6 +9,7 @@ environment:
 # Add regular dependencies here.
 dependencies:
   bson: ^5.0.5
+  sqlite3: ^2.7.5
   # path: ^1.8.0
 
 dev_dependencies:

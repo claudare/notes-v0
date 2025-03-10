@@ -59,7 +59,7 @@ sealed class Event {
   const Event();
 
   // Unique identifier for the event type
-  static int binId = 0;
+  // static int binId = 0;
 
   // Static method to parse any event from binary data
   static Event parseEvent(ByteData bd) {
