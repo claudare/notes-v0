@@ -91,6 +91,20 @@ class Db {
     return logs;
   }
 
+  Iterable<EventLog> eventLogQueryIterable({required int fromId}) sync* {
+    final stmt = db.prepare(
+      'SELECT seq_id, data FROM eventlog WHERE seq_id >= ? ORDER BY seq_id ASC;',
+    );
+
+    final cursor = stmt.selectCursor([fromId]);
+
+    while (cursor.moveNext()) {
+      yield EventLog.fromRow(cursor.current);
+    }
+    // how to ensure that dispose will be called even if inner logic fails?
+    stmt.dispose();
+  }
+
   void printFullState() {
     print("DB FULL STATE START");
     final res = db.select('SELECT * FROM note');

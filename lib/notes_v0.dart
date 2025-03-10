@@ -17,24 +17,31 @@ void main() {
   db.eventLogInsert(EventLog(seqId: 2, data: jsonEncode(secondEv)));
   db.eventLogInsert(EventLog(seqId: 3, data: jsonEncode(thirdEv)));
 
-  final logs = db.eventLogQuery(fromId: 1);
+  final logsIterable = db.eventLogQueryIterable(fromId: 1);
 
-  // You can iterate on the result set in multiple ways to retrieve Row objects
-  // one by one.
-  for (final log in logs) {
+  final iter = logsIterable.iterator;
+
+  while (iter.moveNext()) {
+    final log = iter.current;
     final event = ev.Event.parseEvent(jsonDecode(log.data));
 
     print('EventLog[id: ${log.seqId}, data: $event]');
 
     db.execStatements(event.statements());
-    // can instead do some optimization and do no transactions
-    // if there is a single query
-    // if (stmts.length == 1) {
-    //   db.execute(stmts[0].sql, stmts[0].parameters);
-    // }
 
     db.printFullState();
   }
+
+  // final logs = db.eventLogQuery(fromId: 1);
+  // for (final log in logs) {
+  //   final event = ev.Event.parseEvent(jsonDecode(log.data));
+
+  //   print('EventLog[id: ${log.seqId}, data: $event]');
+
+  //   db.execStatements(event.statements());
+
+  //   db.printFullState();
+  // }
 
   // Don't forget to dispose the database to avoid memory leaks
   db.deinit();
