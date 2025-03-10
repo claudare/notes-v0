@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_brace_in_string_interps
+
 import 'dart:convert';
 
 import 'package:test/test.dart';
@@ -36,12 +38,13 @@ sealed class Event {
 
   // Static method to parse any event from a map
   static Event parseEvent(Map<String, dynamic> eventMap) {
-    for (var entry in eventMap.entries) {
-      if (_eventParsers.containsKey(entry.key)) {
-        return _eventParsers[entry.key]!(entry.value);
-      }
+    final eventType = eventMap['_type'];
+
+    if (_eventParsers.containsKey(eventType)) {
+      return _eventParsers[eventType]!(eventMap);
     }
-    throw ArgumentError('Unknown event type: ${eventMap.keys}');
+
+    throw ArgumentError('Unknown event type: ${eventType}');
   }
 }
 
@@ -50,15 +53,13 @@ class NoteCreated extends Event {
 
   NoteCreated({required this.noteId});
 
-  static const String _type = 'noteCreate';
+  static const String _type = 'noteCreated';
 
   @override
   NoteCreated.fromJson(Map<String, dynamic> json) : noteId = json['noteId'];
 
   @override
-  Map<String, dynamic> toJson() => {
-    _type: {'noteId': noteId},
-  };
+  Map<String, dynamic> toJson() => {'_type': _type, 'noteId': noteId};
 
   @override
   statements() {
@@ -77,14 +78,12 @@ class NoteDeleted extends Event {
 
   NoteDeleted({required this.noteId});
 
-  static const _type = 'noteDelete';
+  static const _type = 'noteDeleted';
 
   @override
   NoteDeleted.fromJson(Map<String, dynamic> json) : noteId = json['noteId'];
   @override
-  Map<String, dynamic> toJson() => {
-    _type: {'noteId': noteId},
-  };
+  Map<String, dynamic> toJson() => {'_type': _type, 'noteId': noteId};
 
   @override
   List<Statement> statements() {
@@ -100,7 +99,7 @@ class NoteBodyEdited extends Event {
 
   NoteBodyEdited({required this.noteId, required this.value});
 
-  static const _type = 'noteEditBody';
+  static const _type = 'noteBodyEdited';
 
   @override
   NoteBodyEdited.fromJson(Map<String, dynamic> json)
@@ -108,7 +107,9 @@ class NoteBodyEdited extends Event {
       value = json['value'];
   @override
   Map<String, dynamic> toJson() => {
-    _type: {'noteId': noteId, 'value': value},
+    '_type': _type,
+    'noteId': noteId,
+    'value': value,
   };
 
   @override
@@ -119,26 +120,36 @@ class NoteBodyEdited extends Event {
   }
 }
 
-// inline tests are possible!
-// but automatic `dart test` only looks into the test folder
-// run this with
-// dart test lib/union_sealed.dart
-// or just run
-// dart run lib/union_sealed.dart
+// dart test lib/events.dart
 void main() {
-  test('single sederialize', () {
-    final og = NoteCreated(noteId: 1);
-
-    final ser = jsonEncode(og.toJson());
-    print('serialized ${ser}');
+  Event roundTrip(Event og) {
+    final jsonMap = og.toJson();
+    final ser = jsonEncode(jsonMap);
     final map = jsonDecode(ser);
-    print('map ${map}');
-    final deser = Event.parseEvent(map);
+    return Event.parseEvent(map);
+  }
 
-    expect(
-      og.noteId,
-      (deser as NoteCreated).noteId,
-      reason: "values must be the same",
-    );
+  group('Event Serialization Tests', () {
+    test('NoteCreated serialization', () {
+      final og = NoteCreated(noteId: 1);
+      final res = roundTrip(og);
+
+      expect(og.noteId, (res as NoteCreated).noteId);
+    });
+
+    test('NoteDeleted serialization', () {
+      final og = NoteDeleted(noteId: 2);
+      final res = roundTrip(og);
+
+      expect(og.noteId, (res as NoteDeleted).noteId);
+    });
+
+    test('NoteBodyEdited serialization', () {
+      final og = NoteBodyEdited(noteId: 3, value: 'test body');
+      final res = roundTrip(og);
+
+      expect(og.noteId, (res as NoteBodyEdited).noteId);
+      expect(og.value, (res).value);
+    });
   });
 }
