@@ -1,25 +1,56 @@
+import 'package:json_annotation/json_annotation.dart';
+import 'package:json_serializable/json_serializable.dart';
 import 'package:test/test.dart';
 
-// following https://dart.dev/language/class-modifiers#sealed
+part 'union_sealed.g.dart';
 
-sealed class Event {
-  // common events go here
-  // final int seqenceId;
-  // final int timestamp;
-  // Event(this.seqenceId, this.timestamp);
+// following https://dart.dev/language/class-modifiers#sealed
+// serialize with
+// dart run build_runner build
+// serializing this is an impossible task
+class Envelope {
+  final int sequenceId;
+  final int timestamp;
+  Event event;
+
+  Envelope({
+    required this.sequenceId,
+    required this.timestamp,
+    required this.event,
+  });
 }
 
+sealed class Event {}
+
+@JsonSerializable()
 class CreateNoteEvent extends Event {
   int noteId;
 
-  CreateNoteEvent(this.noteId);
+  CreateNoteEvent({required this.noteId});
+
+  /// Connect the generated [_$PersonFromJson] function to the `fromJson`
+  /// factory.
+  factory CreateNoteEvent.fromJson(Map<String, dynamic> json) =>
+      _$CreateNoteEventFromJson(json);
+
+  /// Connect the generated [_$PersonToJson] function to the `toJson` method.
+  Map<String, dynamic> toJson() => _$CreateNoteEventToJson(this);
 }
 
+@JsonSerializable()
 class DeleteNoteEvent extends Event {
   int noteId;
-  String extra;
+  String extra = "empty";
 
-  DeleteNoteEvent(this.noteId, this.extra);
+  DeleteNoteEvent({required this.noteId, required this.extra});
+
+  /// Connect the generated [_$PersonFromJson] function to the `fromJson`
+  /// factory.
+  factory DeleteNoteEvent.fromJson(Map<String, dynamic> json) =>
+      _$DeleteNoteEventFromJson(json);
+
+  /// Connect the generated [_$PersonToJson] function to the `toJson` method.
+  Map<String, dynamic> toJson() => _$DeleteNoteEventToJson(this);
 }
 
 /*
@@ -33,17 +64,20 @@ class DeleteNoteEvent extends Event {
 // or just run
 // dart run lib/union_sealed.dart
 void main() {
-  List<Event> events = [CreateNoteEvent(1), DeleteNoteEvent(1, "testing this")];
+  List<Event> events = [
+    CreateNoteEvent(noteId: 1),
+    DeleteNoteEvent(noteId: 1, extra: "hello world"),
+  ];
 
   for (final event in events) {
     print('prcessing event ${event.toString()}');
-
-    // switch (event) {
-    //   case CreateNoteEvent():
-    //     print("creating note");
-    //   case DeleteNoteEvent():
-    //     print("deleting note");
-    // }
+    switch (event) {
+      case CreateNoteEvent():
+        print("creating note");
+        print('serialized as ${event.toJson()}');
+      case DeleteNoteEvent():
+        print("deleting note");
+    }
 
     var _ = switch (event) {
       CreateNoteEvent() => print('created ${event.noteId}'),
