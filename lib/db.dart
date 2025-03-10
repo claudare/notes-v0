@@ -4,6 +4,11 @@ import 'package:notes_v0/models.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:notes_v0/events.dart' as ev;
 
+// could also use https://pub.dev/packages/sqlite_async
+// as it allows for more performant async operation and has transactions
+// also, nice helper for migrations
+// currently using
+// https://pub.dev/packages/sqlite3
 void main() {
   // this requires that sqlite is installed on the given os
   // so i will need to build or aquire the given library files
@@ -70,35 +75,21 @@ void main() {
     final event = ev.Event.parseEvent(jsonDecode(row['data']));
 
     print('EventLog[id: $seqId, data: $event]');
-    switch (event) {
-      case ev.CreateNoteEvent():
-        print('creating note ${event.noteId}');
-        db.execute(
-          'INSERT INTO note (note_id, title, body) VALUES (?, "", "");',
-          [event.noteId],
-        );
 
-      case ev.DeleteNoteEvent():
-        // this actually fails
-        print('deleting note ${event.noteId}');
-        db.execute('DELETE FROM note WHERE note_id = ?;', [event.noteId]);
-        if (db.updatedRows == 0) {
-          print('WARNING: bad event was provided, nothing was deleted!!!');
-        }
-      case ev.EditBodyNoteEvent():
-        print('editing note ${event.noteId} body to ${event.value}');
-        db.execute(
-          '''
-          UPDATE note
-            SET body = ?
-          WHERE
-            note_id = ?;
-          ''',
-          [event.value, event.noteId],
-        );
+    // example of doing this in a transaction
+    final stmts = event.statements();
+
+    db.execute("BEGIN TRANSACTION;");
+    for (final stmt in stmts) {
+      db.execute(stmt.sql, stmt.parameters);
     }
+    db.execute("COMMIT;");
+    // can instead do some optimization and do no transactions
+    // if there is a single query
+    // if (stmts.length == 1) {
+    //   db.execute(stmts[0].sql, stmts[0].parameters);
+    // }
 
-    // print out the state of the db
     printDbState(db);
   }
 

@@ -8,36 +8,13 @@ import 'package:test/test.dart';
 // https://pub.dev/packages/bson - bson format. manual but good?
 
 // following https://dart.dev/language/class-modifiers#sealed
-// envelope is not needed? as i dont really care about this tbh
-// this can really be a generic, as database layer is used to store this extra metadata
-// class Envelope {
-//   final int sequenceId;
-//   final int timestamp;
-//   Event event;
 
-//   Envelope({
-//     required this.sequenceId,
-//     required this.timestamp,
-//     required this.event,
-//   });
+class Statement {
+  String sql;
+  List<Object?> parameters;
 
-//   Envelope.fromJson(Map<String, dynamic> json)
-//     : sequenceId = json['seq'],
-//       timestamp = json['ts'],
-//       event = Event.parseEvent(json['event']);
-
-//   Map<String, dynamic> toJson() => {
-//     'seq': sequenceId,
-//     'ts': timestamp,
-//     'event': {event.sname(): event.toJson()},
-//   };
-
-//   // sequenceId is assumed to be globally unique, so events could be compared this way
-//   @override
-//   bool operator ==(Object other) =>
-//       identical(this, other) ||
-//       other is Envelope && sequenceId == other.sequenceId;
-// }
+  Statement(this.sql, this.parameters);
+}
 
 sealed class Event {
   static final Map<String, Event Function(Map<String, dynamic>)> _eventParsers =
@@ -53,6 +30,9 @@ sealed class Event {
   Event.fromJson(Map<String, dynamic> json);
 
   Map<String, dynamic> toJson() => {};
+
+  // now the database sideeffects
+  List<Statement> statements();
 
   // Static method to parse any event from a map
   static Event parseEvent(Map<String, dynamic> eventMap) {
@@ -79,6 +59,17 @@ class CreateNoteEvent extends Event {
   Map<String, dynamic> toJson() => {
     _name: {'noteId': noteId},
   };
+
+  @override
+  statements() {
+    return [
+      Statement('INSERT INTO note (note_id, title, body) VALUES (?, "", "");', [
+        noteId,
+      ]),
+    ];
+  }
+
+  // each event must produce a sql statement to execute
 }
 
 class DeleteNoteEvent extends Event {
@@ -94,6 +85,13 @@ class DeleteNoteEvent extends Event {
   Map<String, dynamic> toJson() => {
     _name: {'noteId': noteId},
   };
+
+  @override
+  List<Statement> statements() {
+    return [
+      Statement('DELETE FROM note WHERE note_id = ?;', [noteId]),
+    ];
+  }
 }
 
 class EditBodyNoteEvent extends Event {
@@ -112,6 +110,13 @@ class EditBodyNoteEvent extends Event {
   Map<String, dynamic> toJson() => {
     _name: {'noteId': noteId, 'value': value},
   };
+
+  @override
+  List<Statement> statements() {
+    return [
+      Statement('UPDATE note SET body = ? WHERE note_id = ?;', [value, noteId]),
+    ];
+  }
 }
 
 // inline tests are possible!

@@ -1,5 +1,6 @@
 # notes-v0
 
+running with asserts `dart run --enable-asserts lib/db.dart`
 
 # ideas
 
