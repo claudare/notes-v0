@@ -58,7 +58,8 @@ void main() {
     print('prcessing event ${event.toString()}');
     switch (event) {
       case CreateNoteEvent():
-        print("creating note");
+        print('creating note ${event.noteId}');
+
       // print('serialized as ${event.toJson()}');
       case DeleteNoteEvent():
         print("deleting note");
