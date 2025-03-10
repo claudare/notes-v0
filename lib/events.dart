@@ -19,9 +19,9 @@ class Statement {
 sealed class Event {
   static final Map<String, Event Function(Map<String, dynamic>)> _eventParsers =
       {
-        CreateNoteEvent._name: (json) => CreateNoteEvent.fromJson(json),
-        DeleteNoteEvent._name: (json) => DeleteNoteEvent.fromJson(json),
-        EditBodyNoteEvent._name: (json) => EditBodyNoteEvent.fromJson(json),
+        NoteCreated._type: (json) => NoteCreated.fromJson(json),
+        NoteDeleted._type: (json) => NoteDeleted.fromJson(json),
+        NoteBodyEdited._type: (json) => NoteBodyEdited.fromJson(json),
       };
 
   const Event();
@@ -45,19 +45,19 @@ sealed class Event {
   }
 }
 
-class CreateNoteEvent extends Event {
+class NoteCreated extends Event {
   int noteId;
 
-  CreateNoteEvent({required this.noteId});
+  NoteCreated({required this.noteId});
 
-  static const String _name = 'noteCreate';
+  static const String _type = 'noteCreate';
 
   @override
-  CreateNoteEvent.fromJson(Map<String, dynamic> json) : noteId = json['noteId'];
+  NoteCreated.fromJson(Map<String, dynamic> json) : noteId = json['noteId'];
 
   @override
   Map<String, dynamic> toJson() => {
-    _name: {'noteId': noteId},
+    _type: {'noteId': noteId},
   };
 
   @override
@@ -72,18 +72,18 @@ class CreateNoteEvent extends Event {
   // each event must produce a sql statement to execute
 }
 
-class DeleteNoteEvent extends Event {
+class NoteDeleted extends Event {
   int noteId;
 
-  DeleteNoteEvent({required this.noteId});
+  NoteDeleted({required this.noteId});
 
-  static const _name = 'noteDelete';
+  static const _type = 'noteDelete';
 
   @override
-  DeleteNoteEvent.fromJson(Map<String, dynamic> json) : noteId = json['noteId'];
+  NoteDeleted.fromJson(Map<String, dynamic> json) : noteId = json['noteId'];
   @override
   Map<String, dynamic> toJson() => {
-    _name: {'noteId': noteId},
+    _type: {'noteId': noteId},
   };
 
   @override
@@ -94,21 +94,21 @@ class DeleteNoteEvent extends Event {
   }
 }
 
-class EditBodyNoteEvent extends Event {
+class NoteBodyEdited extends Event {
   int noteId;
   String value;
 
-  EditBodyNoteEvent({required this.noteId, required this.value});
+  NoteBodyEdited({required this.noteId, required this.value});
 
-  static const _name = 'noteEditBody';
+  static const _type = 'noteEditBody';
 
   @override
-  EditBodyNoteEvent.fromJson(Map<String, dynamic> json)
+  NoteBodyEdited.fromJson(Map<String, dynamic> json)
     : noteId = json['noteId'],
       value = json['value'];
   @override
   Map<String, dynamic> toJson() => {
-    _name: {'noteId': noteId, 'value': value},
+    _type: {'noteId': noteId, 'value': value},
   };
 
   @override
@@ -127,7 +127,7 @@ class EditBodyNoteEvent extends Event {
 // dart run lib/union_sealed.dart
 void main() {
   test('single sederialize', () {
-    final og = CreateNoteEvent(noteId: 1);
+    final og = NoteCreated(noteId: 1);
 
     final ser = jsonEncode(og.toJson());
     print('serialized ${ser}');
@@ -137,7 +137,7 @@ void main() {
 
     expect(
       og.noteId,
-      (deser as CreateNoteEvent).noteId,
+      (deser as NoteCreated).noteId,
       reason: "values must be the same",
     );
   });

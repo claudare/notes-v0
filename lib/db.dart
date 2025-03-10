@@ -40,12 +40,9 @@ void main() {
     )
     ''');
 
-  final firstEv = ev.CreateNoteEvent(noteId: 1);
-  final secondEv = ev.EditBodyNoteEvent(
-    noteId: 1,
-    value: "hello world, алоало",
-  );
-  final thirdEv = ev.DeleteNoteEvent(noteId: 1);
+  final firstEv = ev.NoteCreated(noteId: 1);
+  final secondEv = ev.NoteBodyEdited(noteId: 1, value: "hello world, алоало");
+  final thirdEv = ev.NoteDeleted(noteId: 1);
 
   // Prepare a statement to run it multiple times:
   final stmtLogInsert = db.prepare(
