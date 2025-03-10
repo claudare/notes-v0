@@ -40,19 +40,19 @@ class Db {
 
   void createSchema() {
     db.execute('''
-          CREATE TABLE eventlog (
-            seq_id INTEGER NOT NULL PRIMARY KEY,
-            data TEXT NOT NULL
-          );
-        ''');
+CREATE TABLE eventlog (
+  seq_id INTEGER NOT NULL PRIMARY KEY,
+  data TEXT NOT NULL
+);
+''');
 
     db.execute('''
-        CREATE TABLE note (
-          note_id INTEGER NOT NULL PRIMARY KEY,
-          title TEXT NOT NULL,
-          body TEXT NOT NULL
-        )
-        ''');
+CREATE TABLE note (
+  note_id INTEGER NOT NULL PRIMARY KEY,
+  title TEXT NOT NULL,
+  body TEXT NOT NULL
+);
+''');
   }
 
   void execStatements(List<Statement> statements) {

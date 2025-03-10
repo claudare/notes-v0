@@ -18,7 +18,6 @@ void main() {
   db.eventLogInsert(EventLog(seqId: 3, data: jsonEncode(thirdEv)));
 
   final logsIterable = db.eventLogQueryIterable(fromId: 1);
-
   final iter = logsIterable.iterator;
 
   while (iter.moveNext()) {
@@ -31,17 +30,6 @@ void main() {
 
     db.printFullState();
   }
-
-  // final logs = db.eventLogQuery(fromId: 1);
-  // for (final log in logs) {
-  //   final event = ev.Event.parseEvent(jsonDecode(log.data));
-
-  //   print('EventLog[id: ${log.seqId}, data: $event]');
-
-  //   db.execStatements(event.statements());
-
-  //   db.printFullState();
-  // }
 
   // Don't forget to dispose the database to avoid memory leaks
   db.deinit();
