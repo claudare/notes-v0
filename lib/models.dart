@@ -15,7 +15,7 @@ class Note {
 
   Note({required this.noteId, this.title = "", this.body = ""});
 
-  Note.fromRow(sqlite.Row row)
+  Note.fromRow(Map<String, dynamic> row)
     : noteId = row['note_id'],
       title = row['title'],
       body = row['body'];
