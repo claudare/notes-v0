@@ -96,13 +96,16 @@ class Db {
       'SELECT seq_id, data FROM eventlog WHERE seq_id >= ? ORDER BY seq_id ASC;',
     );
 
-    final cursor = stmt.selectCursor([fromId]);
+    try {
+      final cursor = stmt.selectCursor([fromId]);
 
-    while (cursor.moveNext()) {
-      yield EventLog.fromRow(cursor.current);
+      while (cursor.moveNext()) {
+        yield EventLog.fromRow(cursor.current);
+      }
+    } finally {
+      // i really wish dart had more features... like defer
+      stmt.dispose();
     }
-    // how to ensure that dispose will be called even if inner logic fails?
-    stmt.dispose();
   }
 
   void printFullState() {
