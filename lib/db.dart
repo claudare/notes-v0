@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:notes_v0/models.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:notes_v0/events.dart' as ev;
 
@@ -110,9 +111,11 @@ void printDbState(Database db) {
   final res = db.select('SELECT * FROM note');
 
   for (final row in res) {
-    print(
-      'Note[id: ${row['note_id']}, title: ${row['title']}, body: ${row['body']}]',
-    );
+    final note = Note.fromRow(row);
+    print(note.toString());
+    // print(
+    //   'Note[id: ${row['note_id']}, title: ${row['title']}, body: ${row['body']}]',
+    // );
   }
   print("DB STATE END");
 }
