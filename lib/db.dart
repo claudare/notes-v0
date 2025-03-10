@@ -1,6 +1,9 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:sqlite3/sqlite3.dart';
+import 'package:notes_v0/union_sealed_manual_binary.dart' as bin;
+import 'package:sqlite3/sqlite3.dart' as sql;
 
 void main() {
   // this requires that sqlite is installed on the given os
@@ -23,11 +26,14 @@ void main() {
       );
     ''');
 
+  final firstEv = bin.CreateNoteEvent(noteId: 1);
+  final secondEv = bin.DeleteNoteEvent(noteId: 1, extra: "testing");
+
   // Prepare a statement to run it multiple times:
   final stmt = db.prepare('INSERT INTO eventlog (seq_id, data) VALUES (?, ?)');
   stmt
-    ..execute([1, "hello"])
-    ..execute([2, "world"]);
+    ..execute([1, firstEv.toBin().toList(growable: false)])
+    ..execute([2, secondEv.toBin().toList(growable: false)]);
 
   // Dispose a statement when you don't need it anymore to clean up resources.
   stmt.dispose();
@@ -42,7 +48,10 @@ void main() {
   // You can iterate on the result set in multiple ways to retrieve Row objects
   // one by one.
   for (final Row row in resultSet) {
-    print('EventLog[id: ${row['seq_id']}, data: ${row['data']}]');
+    final int seqId = row['seq_id'];
+    print("data type ${row['data'].runtimeType}");
+    final Uint8List data = row['data'];
+    print('EventLog[id: $seqId, data: $data]');
   }
 
   // Register a custom function we can invoke from sql:
