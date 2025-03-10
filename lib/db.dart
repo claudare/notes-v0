@@ -37,21 +37,25 @@ void main() {
     ''');
 
   final firstEv = ev.CreateNoteEvent(noteId: 1);
-  final secondEv = ev.DeleteNoteEvent(noteId: 1, extra: "testing");
+  final secondEv = ev.EditBodyNoteEvent(noteId: 1, value: "hello world");
+  final thirdEv = ev.DeleteNoteEvent(noteId: 1);
 
   // Prepare a statement to run it multiple times:
-  final stmt = db.prepare('INSERT INTO eventlog (seq_id, data) VALUES (?, ?)');
-  stmt
+  final stmtLogInsert = db.prepare(
+    'INSERT INTO eventlog (seq_id, data) VALUES (?, ?);',
+  );
+  stmtLogInsert
     ..execute([1, jsonEncode(firstEv.toJson())])
-    ..execute([2, jsonEncode(secondEv.toJson())]);
+    ..execute([2, jsonEncode(secondEv.toJson())])
+    ..execute([3, jsonEncode(thirdEv.toJson())]);
 
   // Dispose a statement when you don't need it anymore to clean up resources.
-  stmt.dispose();
+  stmtLogInsert.dispose();
 
   // You can run select statements with PreparedStatement.select, or directly
   // on the database:
   final ResultSet resultSet = db.select(
-    'SELECT * FROM eventlog WHERE seq_id >= ?',
+    'SELECT * FROM eventlog WHERE seq_id >= ? order by seq_id ASC;',
     [1],
   );
 
@@ -67,13 +71,44 @@ void main() {
     switch (event) {
       case ev.CreateNoteEvent():
         print('creating note ${event.noteId}');
+        db.execute(
+          'INSERT INTO note (note_id, title, body) VALUES (?, "", "");',
+          [event.noteId],
+        );
 
-      // print('serialized as ${event.toJson()}');
       case ev.DeleteNoteEvent():
         print('deleting note ${event.noteId}');
+        db.execute('DELETE FROM note WHERE note_id = ?;', [event.noteId]);
+
+      case ev.EditBodyNoteEvent():
+        print('editing note ${event.noteId} body to ${event.value}');
+        db.execute(
+          '''
+          UPDATE note
+            SET body = ?
+          WHERE
+            note_id = ?;
+          ''',
+          [event.value, event.noteId],
+        );
     }
+
+    // print out the state of the db
+    printDbState(db);
   }
 
   // Don't forget to dispose the database to avoid memory leaks
   db.dispose();
+}
+
+void printDbState(Database db) {
+  print("DB STATE START");
+  final res = db.select('SELECT * FROM note');
+
+  for (final row in res) {
+    print(
+      'Note[id: ${row['note_id']}, title: ${row['title']}, body: ${row['body']}]',
+    );
+  }
+  print("DB STATE END");
 }

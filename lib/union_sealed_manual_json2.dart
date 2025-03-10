@@ -45,6 +45,7 @@ sealed class Event {
       {
         'note_create': (json) => CreateNoteEvent.fromJson(json),
         'note_delete': (json) => DeleteNoteEvent.fromJson(json),
+        'note_edit_body': (json) => EditBodyNoteEvent.fromJson(json),
       };
 
   const Event();
@@ -85,9 +86,9 @@ class CreateNoteEvent extends Event {
 
 class DeleteNoteEvent extends Event {
   int noteId;
-  String extra;
+  String extra = "";
 
-  DeleteNoteEvent({required this.noteId, required this.extra});
+  DeleteNoteEvent({required this.noteId, this.extra = ""});
 
   @override
   String name() => 'note_delete';
@@ -101,6 +102,24 @@ class DeleteNoteEvent extends Event {
   };
 }
 
+class EditBodyNoteEvent extends Event {
+  int noteId;
+  String value;
+
+  EditBodyNoteEvent({required this.noteId, required this.value});
+
+  @override
+  String name() => 'note_edit_body';
+  @override
+  EditBodyNoteEvent.fromJson(Map<String, dynamic> json)
+    : noteId = json['noteId'],
+      value = json['value'];
+  @override
+  Map<String, dynamic> toJson() => {
+    name(): {'noteId': noteId, 'value': value},
+  };
+}
+
 // inline tests are possible!
 // but automatic `dart test` only looks into the test folder
 // run this with
@@ -108,30 +127,30 @@ class DeleteNoteEvent extends Event {
 // or just run
 // dart run lib/union_sealed.dart
 void main() {
-  test('smoke', () {
-    List<Event> events = [
-      CreateNoteEvent(noteId: 1),
-      DeleteNoteEvent(noteId: 1, extra: "hello world"),
-    ];
+  // test('smoke', () {
+  //   List<Event> events = [
+  //     CreateNoteEvent(noteId: 1),
+  //     DeleteNoteEvent(noteId: 1, extra: "hello world"),
+  //   ];
 
-    for (final event in events) {
-      print('processing event ${event.toString()}');
-      switch (event) {
-        case CreateNoteEvent():
-          print("creating note");
-          print('serialized as ${jsonEncode(event.toJson())}');
-        case DeleteNoteEvent():
-          print("deleting note");
-      }
+  //   for (final event in events) {
+  //     print('processing event ${event.toString()}');
+  //     switch (event) {
+  //       case CreateNoteEvent():
+  //         print("creating note");
+  //         print('serialized as ${jsonEncode(event.toJson())}');
+  //       case DeleteNoteEvent():
+  //         print("deleting note");
+  //     }
 
-      var _ = switch (event) {
-        CreateNoteEvent() => print('created ${event.noteId}'),
-        DeleteNoteEvent() => print(
-          'deleted ${event.noteId} with ${event.extra}',
-        ),
-      };
-    }
-  });
+  //     var _ = switch (event) {
+  //       CreateNoteEvent() => print('created ${event.noteId}'),
+  //       DeleteNoteEvent() => print(
+  //         'deleted ${event.noteId} with ${event.extra}',
+  //       ),
+  //     };
+  //   }
+  // });
 
   test('single sederialize', () {
     final og = CreateNoteEvent(noteId: 1);
