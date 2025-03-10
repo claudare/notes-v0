@@ -2,7 +2,8 @@ import 'package:bson/bson.dart';
 
 // this sucks as all events must have a GLOBAL unique id.
 // why cant i create insteances of [[[SerializationRepository]]]?
-
+// https://pub.dev/packages/bson
+// im going to try a more manual version of this
 void main() {
   /// Before starting to use the Object codec, we have to register the classes
   /// in the repository
