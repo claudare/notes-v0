@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'dart:typed_data';
 import 'package:test/test.dart';
 
 // other cool libraries to do this, but in binary.
@@ -97,10 +98,6 @@ class DeleteNoteEvent extends Event {
   Map<String, dynamic> toJson() => {'noteId': noteId, 'extra': extra};
 }
 
-/*
-  what each event has? sequenceId and timestamp
-*/
-
 // inline tests are possible!
 // but automatic `dart test` only looks into the test folder
 // run this with
@@ -167,8 +164,4 @@ void main() {
 
     expect(og == result, true, reason: "envelopes are assumed to be the same");
   }, tags: "envelope");
-
-  // test('calculate', () {
-  //   expect(42, 420);
-  // });
 }
