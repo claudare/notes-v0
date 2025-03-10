@@ -2,7 +2,10 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:json_serializable/json_serializable.dart';
 import 'package:test/test.dart';
 
-part 'union_sealed.g.dart';
+// other cool libraries to do this, but in binary.
+// https://pub.dev/packages/packme - but unfortunately its an rpc lib
+// https://github.com/grpc/grpc-dart - its nice but overly complex. May be good for easy client/server implementation though...
+// https://pub.dev/packages/bson - bson format. manual but good?
 
 // following https://dart.dev/language/class-modifiers#sealed
 // serialize with
@@ -22,35 +25,17 @@ class Envelope {
 
 sealed class Event {}
 
-@JsonSerializable()
 class CreateNoteEvent extends Event {
   int noteId;
 
   CreateNoteEvent({required this.noteId});
-
-  /// Connect the generated [_$PersonFromJson] function to the `fromJson`
-  /// factory.
-  factory CreateNoteEvent.fromJson(Map<String, dynamic> json) =>
-      _$CreateNoteEventFromJson(json);
-
-  /// Connect the generated [_$PersonToJson] function to the `toJson` method.
-  Map<String, dynamic> toJson() => _$CreateNoteEventToJson(this);
 }
 
-@JsonSerializable()
 class DeleteNoteEvent extends Event {
   int noteId;
   String extra = "empty";
 
   DeleteNoteEvent({required this.noteId, required this.extra});
-
-  /// Connect the generated [_$PersonFromJson] function to the `fromJson`
-  /// factory.
-  factory DeleteNoteEvent.fromJson(Map<String, dynamic> json) =>
-      _$DeleteNoteEventFromJson(json);
-
-  /// Connect the generated [_$PersonToJson] function to the `toJson` method.
-  Map<String, dynamic> toJson() => _$DeleteNoteEventToJson(this);
 }
 
 /*
@@ -74,7 +59,7 @@ void main() {
     switch (event) {
       case CreateNoteEvent():
         print("creating note");
-        print('serialized as ${event.toJson()}');
+      // print('serialized as ${event.toJson()}');
       case DeleteNoteEvent():
         print("deleting note");
     }
