@@ -1,5 +1,3 @@
-import 'package:sqlite3/sqlite3.dart' as sqlite;
-
 class EventLog {
   int seqId;
   String data;
