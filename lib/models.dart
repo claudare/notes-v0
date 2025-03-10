@@ -1,8 +1,14 @@
+import 'package:notes_v0/events.dart';
+
 class EventLog {
   int seqId;
   String data;
 
   EventLog({required this.seqId, required this.data});
+
+  factory EventLog.fromRow(Map<String, dynamic> map) {
+    return EventLog(seqId: map['seq_id'] as int, data: map['data'] as String);
+  }
 }
 
 // This is for convenient use

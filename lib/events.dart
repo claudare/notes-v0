@@ -1,22 +1,9 @@
-// ignore_for_file: unnecessary_brace_in_string_interps
-
 import 'dart:convert';
 
+import 'package:notes_v0/db.dart';
 import 'package:test/test.dart';
 
-// other cool libraries to do this, but in binary.
-// https://pub.dev/packages/packme - but unfortunately its an rpc lib
-// https://github.com/grpc/grpc-dart - its nice but overly complex. May be good for easy client/server implementation though...
-// https://pub.dev/packages/bson - bson format. manual but good?
-
 // following https://dart.dev/language/class-modifiers#sealed
-
-class Statement {
-  String sql;
-  List<Object?> parameters;
-
-  Statement(this.sql, this.parameters);
-}
 
 sealed class Event {
   static final Map<String, Event Function(Map<String, dynamic>)> _eventParsers =
@@ -44,7 +31,7 @@ sealed class Event {
       return _eventParsers[eventType]!(eventMap);
     }
 
-    throw ArgumentError('Unknown event type: ${eventType}');
+    throw ArgumentError('Unknown event type: $eventType');
   }
 }
 
