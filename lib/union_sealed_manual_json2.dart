@@ -8,9 +8,7 @@ import 'package:test/test.dart';
 // https://pub.dev/packages/bson - bson format. manual but good?
 
 // following https://dart.dev/language/class-modifiers#sealed
-// serialize with
-// dart run build_runner build
-// serializing this is an impossible task
+// envelope is not needed? as i dont really care about this tbh
 class Envelope {
   final int sequenceId;
   final int timestamp;
@@ -86,19 +84,16 @@ class CreateNoteEvent extends Event {
 
 class DeleteNoteEvent extends Event {
   int noteId;
-  String extra = "";
 
-  DeleteNoteEvent({required this.noteId, this.extra = ""});
+  DeleteNoteEvent({required this.noteId});
 
   @override
   String name() => 'note_delete';
   @override
-  DeleteNoteEvent.fromJson(Map<String, dynamic> json)
-    : noteId = json['noteId'],
-      extra = json['extra'];
+  DeleteNoteEvent.fromJson(Map<String, dynamic> json) : noteId = json['noteId'];
   @override
   Map<String, dynamic> toJson() => {
-    name(): {'noteId': noteId, 'extra': extra},
+    name(): {'noteId': noteId},
   };
 }
 

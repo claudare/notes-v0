@@ -21,10 +21,11 @@ void main() {
   final db = sqlite3.openInMemory();
 
   // Create eventlog
+  // use data TEXT as utf8 encoding is automatic
   db.execute('''
       CREATE TABLE eventlog (
         seq_id INTEGER NOT NULL PRIMARY KEY,
-        data BLOB NOT NULL
+        data TEXT NOT NULL
       );
     ''');
 
@@ -37,7 +38,10 @@ void main() {
     ''');
 
   final firstEv = ev.CreateNoteEvent(noteId: 1);
-  final secondEv = ev.EditBodyNoteEvent(noteId: 1, value: "hello world");
+  final secondEv = ev.EditBodyNoteEvent(
+    noteId: 1,
+    value: "hello world, алоало",
+  );
   final thirdEv = ev.DeleteNoteEvent(noteId: 1);
 
   // Prepare a statement to run it multiple times:
