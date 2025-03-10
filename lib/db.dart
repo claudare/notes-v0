@@ -1,11 +1,7 @@
 import 'dart:convert';
-import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:sqlite3/sqlite3.dart';
-// import 'package:notes_v0/union_sealed_manual_binary.dart' as ev;
-import 'package:notes_v0/union_sealed_manual_json2.dart' as ev;
-import 'package:sqlite3/sqlite3.dart' as sql;
+import 'package:notes_v0/events.dart' as ev;
 
 void main() {
   // this requires that sqlite is installed on the given os
@@ -14,6 +10,7 @@ void main() {
   // https://pub.dev/packages/sqlite3#manually-providing-sqlite3-libraries
   // for now just install the sqlite3 dev
   // sudo apt install libsqlite3-dev
+  // i think in flutter it gets bundled automatically?
   print('Using sqlite3 ${sqlite3.version}');
 
   // Create a new in-memory database. To use a database backed by a file, you
@@ -81,9 +78,12 @@ void main() {
         );
 
       case ev.DeleteNoteEvent():
+        // this actually fails
         print('deleting note ${event.noteId}');
         db.execute('DELETE FROM note WHERE note_id = ?;', [event.noteId]);
-
+        if (db.updatedRows == 0) {
+          print('WARNING: bad event was provided, nothing was deleted!!!');
+        }
       case ev.EditBodyNoteEvent():
         print('editing note ${event.noteId} body to ${event.value}');
         db.execute(
