@@ -40,19 +40,32 @@ class Db {
 
   void createSchema() {
     db.execute('''
-CREATE TABLE eventlog (
-  seq_id INTEGER NOT NULL PRIMARY KEY,
-  data TEXT NOT NULL
-);
-''');
-
+    CREATE TABLE eventlog (
+      seq_id INTEGER NOT NULL PRIMARY KEY,
+      data TEXT NOT NULL
+    );
+    ''');
     db.execute('''
-CREATE TABLE note (
-  note_id INTEGER NOT NULL PRIMARY KEY,
-  title TEXT NOT NULL,
-  body TEXT NOT NULL
-);
-''');
+    CREATE TABLE tag (
+      tag_id INTEGER NOT NULL PRIMARY KEY,
+      name TEXT NOT NULL
+    );
+    ''');
+    db.execute('''
+    CREATE TABLE note (
+      note_id INTEGER NOT NULL PRIMARY KEY,
+      title TEXT NOT NULL,
+      body TEXT NOT NULL
+    );
+    ''');
+    db.execute('''
+    CREATE TABLE note_tag (
+      note_id INTEGER NOT NULL,
+      tag_id INTEGER NOT NULL,
+      FOREIGN KEY (note_id) REFERENCES note(note_id),
+      FOREIGN KEY (tag_id) REFERENCES tag(tag_id)
+    );
+    ''');
   }
 
   void execStatements(List<Statement> statements) {
@@ -108,17 +121,90 @@ CREATE TABLE note (
     }
   }
 
-  void printFullState() {
-    print("DB FULL STATE START");
-    final res = db.select('SELECT * FROM note');
+  Note? getNoteWithTags(int noteId) {
+    final stmt = db.prepare('''
+      SELECT
+        note.note_id, note.title, note.body,
+        tag.tag_id, tag.name
+      FROM
+        note
+      LEFT JOIN
+        note_tag ON note.note_id = note_tag.note_id
+      LEFT JOIN
+        tag ON note_tag.tag_id = tag.tag_id
+      WHERE
+        note.note_id = ?
+      ''');
 
-    for (final row in res) {
-      final note = Note.fromRow(row);
-      print(note.toString());
-      // print(
-      //   'Note[id: ${row['note_id']}, title: ${row['title']}, body: ${row['body']}]',
-      // );
+    try {
+      final cursor = stmt.selectCursor([noteId]);
+
+      if (!cursor.moveNext()) {
+        return null; // Note not found
+      }
+
+      final first = cursor.current;
+
+      // row is {note_id: 1, title: , body: , tag_id: 10, name: tag1}
+      // print('row is $first');
+
+      final note = Note(noteId: 1);
+
+      List<Tag> tags = [];
+
+      if (first['tag_id'] != null) {
+        // first tag will be included in the original row
+        // this is not very ergonimic tbh
+        // and this dangles "name" in the sql statement
+        tags.add(Tag.fromRow(first));
+      }
+
+      while (cursor.moveNext()) {
+        final tagRow = cursor.current;
+        tags.add(Tag.fromRow(tagRow));
+      }
+
+      // print('got tags $tags');
+
+      note.tags = tags;
+
+      return note;
+    } finally {
+      stmt.dispose();
     }
-    print("DB FULL STATE END");
+  }
+
+  void tagInsert(Tag tag) {
+    db.execute(
+      '''
+      INSERT INTO tag (tag_id, name)
+      VALUES (?, ?);
+    ''',
+      [tag.tagId, tag.name],
+    );
+  }
+
+  List<Tag> tagQueryAll() {
+    final resultSet = db.select('SELECT * FROM tag');
+    List<Tag> tags = [];
+    for (final row in resultSet) {
+      final tag = Tag.fromRow(row);
+      tags.add(tag);
+    }
+    return tags;
+  }
+
+  void printFullState() {
+    // print("DB FULL STATE START");
+    // final res = db.select('SELECT * FROM note');
+
+    // for (final row in res) {
+    //   final note = Note.fromRow(row);
+    //   print(note.toString());
+    //   // print(
+    //   //   'Note[id: ${row['note_id']}, title: ${row['title']}, body: ${row['body']}]',
+    //   // );
+    // }
+    // print("DB FULL STATE END");
   }
 }

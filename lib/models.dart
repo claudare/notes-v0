@@ -17,15 +17,39 @@ class Note {
   String title;
   String body;
 
-  Note({required this.noteId, this.title = "", this.body = ""});
+  List<Tag> tags;
 
-  Note.fromRow(Map<String, dynamic> row)
-    : noteId = row['note_id'],
-      title = row['title'],
-      body = row['body'];
+  Note({
+    required this.noteId,
+    this.title = "",
+    this.body = "",
+    this.tags = const [],
+  });
+
+  // cant use this anymore, as tags are involved
+  // Note.fromRow(Map<String, dynamic> row)
+  //   : noteId = row['note_id'],
+  //     title = row['title'],
+  //     body = row['body'];
 
   @override
   String toString() {
-    return 'Note[id: $noteId, title: $title, body: $body]';
+    return 'Note[id: $noteId, title: $title, body: $body, tagCount ${tags.length}]';
+  }
+}
+
+class Tag {
+  int tagId;
+  String name;
+
+  Tag({required this.tagId, required this.name});
+
+  factory Tag.fromRow(Map<String, dynamic> map) {
+    return Tag(tagId: map['tag_id'] as int, name: map['name'] as String);
+  }
+
+  @override
+  String toString() {
+    return 'Tag[id: $tagId, name: $name]';
   }
 }

@@ -107,6 +107,64 @@ class NoteBodyEdited extends Event {
   }
 }
 
+class TagCreated extends Event {
+  int tagId;
+  String name;
+
+  TagCreated({required this.tagId, required this.name});
+
+  static const _type = 'tagCreated';
+
+  @override
+  TagCreated.fromJson(Map<String, dynamic> json)
+    : tagId = json['tagId'],
+      name = json['name'];
+  @override
+  Map<String, dynamic> toJson() => {
+    '_type': _type,
+    'tagId': tagId,
+    'name': name,
+  };
+
+  @override
+  List<Statement> statements() {
+    return [
+      Statement('INSERT INTO tag (tag_id, name) VALUES (?, ?);', [tagId, name]),
+    ];
+  }
+}
+
+class TagAddedToNote extends Event {
+  int tagId;
+  int noteId;
+
+  TagAddedToNote({required this.tagId, required this.noteId});
+
+  static const String _type = 'tagAddedToNote';
+
+  @override
+  TagAddedToNote.fromJson(Map<String, dynamic> json)
+    : tagId = json['tagId'],
+      noteId = json['noteId'];
+
+  @override
+  Map<String, dynamic> toJson() => {
+    '_type': _type,
+    'tagId': tagId,
+    'noteId': noteId,
+  };
+
+  @override
+  List<Statement> statements() {
+    return [
+      Statement('INSERT INTO note_tag (note_id, tag_id) VALUES (?, ?);', [
+        noteId,
+        tagId,
+      ]),
+    ];
+  }
+}
+
 // dart test lib/events.dart
 void main() {
   Event roundTrip(Event og) {
