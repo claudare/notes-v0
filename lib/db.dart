@@ -83,6 +83,10 @@ class Db {
     }
   }
 
+  void execEventStatements(ev.Event event) {
+    execStatements(event.statements());
+  }
+
   void eventLogInsert(EventLog log) {
     // no caching of prepared statements yet
     db.execute('INSERT INTO eventlog (seq_id, data) VALUES (?, ?);', [

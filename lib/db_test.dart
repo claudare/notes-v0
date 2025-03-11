@@ -13,11 +13,8 @@ void main() {
     db.deinit();
   });
 
-  test('notes with tags', () {
-    // Create a new event for creating a note
-    final createNoteEvent = ev.NoteCreated(noteId: 1);
-
-    db.execStatements(createNoteEvent.statements());
+  test('tags', () {
+    db.execEventStatements(ev.NoteCreated(noteId: 1));
 
     // Fetch the created note from the database
     final createdNote = db.getNoteWithTags(1);
@@ -27,13 +24,11 @@ void main() {
     expect(createdNote.body, "");
 
     // // Create events for creating tags
-    final createTagEvent1 = ev.TagCreated(tagId: 10, name: "tag1");
-    db.execStatements(createTagEvent1.statements());
-    db.execStatements(ev.TagAddedToNote(noteId: 1, tagId: 10).statements());
+    db.execEventStatements(ev.TagCreated(tagId: 10, name: "tag1"));
+    db.execEventStatements(ev.TagAddedToNote(noteId: 1, tagId: 10));
 
-    final createTagEvent2 = ev.TagCreated(tagId: 11, name: "tag2");
-    db.execStatements(createTagEvent2.statements());
-    db.execStatements(ev.TagAddedToNote(noteId: 1, tagId: 11).statements());
+    db.execEventStatements(ev.TagCreated(tagId: 11, name: "tag2"));
+    db.execEventStatements(ev.TagAddedToNote(noteId: 1, tagId: 11));
 
     // // Fetch the note with associated tags
     final noteWithTags = db.getNoteWithTags(1);
