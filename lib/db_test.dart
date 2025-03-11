@@ -1,6 +1,5 @@
 import 'package:test/test.dart';
 import 'package:notes_v0/events.dart' as ev;
-import 'package:notes_v0/models.dart';
 import 'package:notes_v0/db.dart';
 
 void main() {
