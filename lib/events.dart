@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:notes_v0/db.dart';
+import 'package:notes_v0_1/db.dart';
 
 // following https://dart.dev/language/class-modifiers#sealed
 

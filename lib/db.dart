@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:notes_v0/models.dart';
+import 'package:notes_v0_1/models.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite;
-import 'package:notes_v0/events.dart' as ev;
+import 'package:notes_v0_1/events.dart' as ev;
 
 // could also use https://pub.dev/packages/sqlite_async
 // as it allows for more performant async operation and has transactions
@@ -199,16 +199,15 @@ class Db {
   }
 
   void printFullState() {
-    // print("DB FULL STATE START");
-    // final res = db.select('SELECT * FROM note');
+    print("DB FULL STATE START");
+    final res = db.select('SELECT note_id FROM note');
 
-    // for (final row in res) {
-    //   final note = Note.fromRow(row);
-    //   print(note.toString());
-    //   // print(
-    //   //   'Note[id: ${row['note_id']}, title: ${row['title']}, body: ${row['body']}]',
-    //   // );
-    // }
-    // print("DB FULL STATE END");
+    for (final row in res) {
+      final note = getNoteWithTags(row['note_id']);
+      if (note != null) {
+        print(note.toString());
+      }
+    }
+    print("DB FULL STATE END");
   }
 }

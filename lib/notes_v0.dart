@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:notes_v0/db.dart';
-import 'package:notes_v0/events.dart' as ev;
-import 'package:notes_v0/models.dart';
+import 'package:notes_v0_1/db.dart';
+import 'package:notes_v0_1/events.dart' as ev;
+import 'package:notes_v0_1/models.dart';
 
 void main() {
   // Create a new in-memory database. To use a database backed by a file, you

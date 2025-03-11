@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:test/test.dart';
-import 'package:notes_v0/events.dart';
+import 'package:notes_v0_1/events.dart';
 
 // dart test lib/events.dart
 void main() {

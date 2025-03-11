@@ -1,4 +1,4 @@
-import 'package:notes_v0/events.dart';
+import 'package:notes_v0_1/events.dart';
 
 class EventLog {
   int seqId;

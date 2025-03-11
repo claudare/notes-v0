@@ -1,6 +1,6 @@
 import 'package:test/test.dart';
-import 'package:notes_v0/events.dart' as ev;
-import 'package:notes_v0/db.dart';
+import 'package:notes_v0_1/events.dart' as ev;
+import 'package:notes_v0_1/db.dart';
 
 void main() {
   late Db db;
