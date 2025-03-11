@@ -163,3 +163,51 @@ class TagAddedToNote extends Event {
     ];
   }
 }
+
+class TagAssignToNote extends Event {
+  int noteId;
+  String tagName;
+
+  TagAssignToNote({required this.noteId, required this.tagName});
+
+  static const _type = 'tagAssignToNote';
+
+  @override
+  TagAssignToNote.fromJson(Map<String, dynamic> json)
+    : noteId = json['noteId'],
+      tagName = json['tagName'];
+
+  @override
+  Map<String, dynamic> toJson() => {
+    '_type': _type,
+    'noteId': noteId,
+    'tagName': tagName,
+  };
+
+  // hmm, staments in this case require to have some sort of logic
+  // but by principles I dont want them to.
+  // In this case, sqlite should have the ability to autogenerate these ids
+  // Also, I dont want autoincrement?
+  // Maybe use a composite primary key with autoincrement? The UNIQUE(device_id, tag_id), where tag_id is INTEGER PRIMATE KEY AUTOINCREMENT?
+  // I really do need to use some sort of shorter uuids for all items
+  // dont use v4, use something which can be prefixed (scoped) with the device id (which is fully random)
+  // this way collisions are really well taken care of.
+  // but then this will require custom compilation of the sqlite3, which I would like to avoid
+  // there is a way to bring in custom functions though, could be interesing
+  // https://pub.dev/packages/sqlite3/example
+  // same can be done with sqlite_async
+  // https://github.com/powersync-ja/sqlite_async.dart/blob/main/packages/sqlite_async/example/custom_functions_example.dart
+  @override
+  List<Statement> statements() {
+    return [
+      Statement('INSERT OR IGNORE INTO tag (tag_id, name) VALUES (?, ?);', [
+        null,
+        tagName,
+      ]),
+      Statement(
+        'INSERT INTO note_tag (note_id, tag_id) SELECT ?, tag_id FROM tag WHERE name = ?;',
+        [noteId, tagName],
+      ),
+    ];
+  }
+}
